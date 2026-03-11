@@ -39,24 +39,9 @@ border-radius:6px;
 cursor:pointer;
 }
 
-#tabs{
-display:flex;
-background:#181818;
-}
-
-.tab{
-padding:8px 14px;
-cursor:pointer;
-border-right:1px solid #333;
-}
-
-.tab.active{
-background:#333;
-}
-
 iframe{
 width:100%;
-height:calc(100vh - 90px);
+height:calc(100vh - 60px);
 border:none;
 }
 
@@ -67,10 +52,6 @@ padding:60px;
 
 .robot{
 font-size:80px;
-}
-
-.searchBox{
-margin-top:20px;
 }
 
 .searchResult{
@@ -87,21 +68,65 @@ border-radius:10px;
 <body>
 
 <div id="topbar">
-
 <input id="url" placeholder="Digite um site .onion ou pesquise">
-
 <button onclick="openSite()">Abrir</button>
-
 </div>
-
-<div id="tabs"></div>
 
 <div id="view"></div>
 
 <script>
 
-let blockedSites = [
+/* =========================
+   CONSOLE WARNING
+========================= */
 
+console.clear()
+
+console.log(`
+                             ......                             
+                     ......................                     
+                 .....---+++--------+++---.....                 
+               ...--++-...................-+--...               
+            ...-++--.........................-++-...            
+          ...-++--.---------...................-++-...          
+         ..-+++----------------------------------+++-..         
+       ..-++++------------------------------------++++-..       
+      ..-+++#--------------------------------------++++-..      
+     ..-++##+++++++++---+++++++++++++++++---++++++++#+++-..     
+    ..-++###++++++++---+++++++++++++++++++---+++++++###++-..    
+   ..-++####+++++++--+++++++++++++++++++++++--++++++###+++-..   
+   .-+++##########+-+#######################+-+#########+++-.   
+  ..-++##########++++#######################++++#########++-..  
+  ..+++##########+++#########################+++#########+++..  
+  .-++###########+++#########################+++##########++-.  
+ ..-++###########++###########################++##########++-.. 
+ ..-++###########++###########################++##########++-.. 
+ ..-++###########++###########################++##########++-.. 
+  .-++###########++###########################++##########++-.  
+  .-+++##########+++#########################+++#########+++-.  
+  ..-++###########++#########################++##########++-..  
+   .-+++##########+++#######################+++#########+++-.   
+   ..-++###########+++#####################+++#########+++-..   
+    ..-++###########+++###################+++#########+++-..    
+     ..-+++##########+++#################++##########+++-..     
+      ..-+++##########++++#############++###########+++-..      
+       ..-+++###########++++######################++++-..       
+         ..-+++###########++++##################++++-..         
+          ...-++++###########++++++#########++++++-...          
+             ..-+++++############+++++++++++++++-..             
+               ...-++++++++##########+++++++--...               
+                 .....--+++++++++++++++---.....                 
+                     ......................                     
+                             ......                             
+`)
+
+console.warn("[!] Do not paste random code from other users, 99/100 times you will be executing something malicious!")
+
+/* =========================
+   BLOQUEIOS
+========================= */
+
+let blockedSites = [
 "instagram.onion",
 "youtube.onion",
 "tiktok.onion",
@@ -111,8 +136,11 @@ let blockedSites = [
 "matrix.onion",
 "web.whatsapp.onion",
 "angiru.com.onion"
-
 ]
+
+/* =========================
+   CONVERSÃO .ONION
+========================= */
 
 function convertOnion(url){
 
@@ -139,11 +167,19 @@ return "https://" + url.replace(".onion",".com")
 
 }
 
+/* =========================
+   DELAY
+========================= */
+
 function slowDelay(){
 return new Promise(resolve=>{
 setTimeout(resolve,2000 + Math.random()*3000)
 })
 }
+
+/* =========================
+   ERRO
+========================= */
 
 function showError(site){
 
@@ -156,101 +192,42 @@ document.getElementById("view").innerHTML = `
 
 <p>O site <b>${site}</b> é considerado uma rede social proibida.</p>
 
-<p>Este navegador segue as regras do governo de BryanEthernet.</p>
-
-<div class="searchBox">
-
-<input id="search" placeholder="Pesquisar no BryanEthernet">
-
-<button onclick="search()">Pesquisar</button>
-
-</div>
-
-<div id="results"></div>
-
 </div>
 `
 
 }
 
-function search(){
-
-let q = document.getElementById("search").value.toLowerCase()
-
-let results = document.getElementById("results")
-
-results.innerHTML = ""
-
-let pages = [
-
-{
-title:"Que sites são permetidos e não permetidos em navegador de BryanEthernet?",
-text:`Isso não é permetido por causa que o governo de BryanEhternet Não querem ver postages de seu navegador.
-
-os unicos sites permetidos pelo governo são :
-
-discord.onion
-chattingjaponese.onion
-stoat.onion`
-},
-
-{
-title:"Por que redes sociais são bloqueadas?",
-text:"O governo BryanEthernet bloqueia redes sociais para evitar compartilhamento de postagens."
-},
-
-{
-title:"Lista de sites bloqueados",
-text:blockedSites.join(", ")
-}
-
-]
-
-pages.forEach(p=>{
-
-if(p.title.toLowerCase().includes(q)){
-
-let div=document.createElement("div")
-
-div.className="searchResult"
-
-div.innerHTML = "<h3>"+p.title+"</h3><p>"+p.text+"</p>"
-
-results.appendChild(div)
-
-}
-
-})
-
-}
+/* =========================
+   ABRIR SITE
+========================= */
 
 async function openSite(){
 
 let input = document.getElementById("url").value.trim().toLowerCase()
 
 if(!input){
-
 showError("site desconhecido")
 return
-
 }
 
 if(!input.endsWith(".onion")){
-
 document.getElementById("view").innerHTML="<h2 style='padding:40px'>Este navegador só aceita domínios .onion</h2>"
 return
-
 }
 
 let clean = input.replace("https://","").replace("http://","")
 clean = clean.replace("www.","")
 
 if(blockedSites.includes(clean)){
-
 showError(clean)
 return
-
 }
+
+/* logs fake tipo navegador */
+
+console.log("[BryanEthernet] Resolving onion address...")
+console.log("[BryanEthernet] Connecting nodes...")
+console.log("[BryanEthernet] Loading resources for:", clean)
 
 document.getElementById("view").innerHTML="<h2 style='padding:20px'>Conectando na rede BryanEthernet...</h2>"
 
