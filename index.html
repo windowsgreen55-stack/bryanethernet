@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<title>BryanEthernet Browser</title>
+
+<link rel="icon" href="favicon.ico">
+
+<style>
+
+body{
+margin:0;
+background:#0f0f0f;
+color:white;
+font-family:Arial;
+}
+
+#topbar{
+background:#1a1a1a;
+padding:10px;
+display:flex;
+gap:10px;
+}
+
+#url{
+flex:1;
+padding:8px;
+border:none;
+border-radius:6px;
+}
+
+button{
+padding:8px 12px;
+background:#2a2a2a;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+#tabs{
+display:flex;
+background:#181818;
+}
+
+.tab{
+padding:8px 14px;
+cursor:pointer;
+border-right:1px solid #333;
+}
+
+.tab.active{
+background:#333;
+}
+
+iframe{
+width:100%;
+height:calc(100vh - 90px);
+border:none;
+}
+
+.errorPage{
+text-align:center;
+padding:60px;
+}
+
+.robot{
+font-size:80px;
+}
+
+.searchBox{
+margin-top:20px;
+}
+
+.searchResult{
+margin-top:20px;
+padding:15px;
+background:#1e1e1e;
+border-radius:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="topbar">
+
+<input id="url" placeholder="Digite um site .onion ou pesquise">
+
+<button onclick="openSite()">Abrir</button>
+
+</div>
+
+<div id="tabs"></div>
+
+<div id="view"></div>
+
+<script>
+
+let blockedSites = [
+
+"instagram.onion",
+"youtube.onion",
+"tiktok.onion",
+"kwai.onion",
+"bilibili.onion",
+"netflix.onion",
+"matrix.onion",
+"web.whatsapp.onion",
+"angiru.com.onion"
+
+]
+
+function convertOnion(url){
+
+url = url.replace("https://","").replace("http://","")
+url = url.replace("www.","")
+
+if(url === "chattingjaponese.onion"){
+return "https://windowsgreen55-stack.github.io/-j-a-p-o-n-e-s-e-/"
+}
+
+if(url === "discord.onion"){
+return "https://discord.com/app"
+}
+
+if(url === "stoat.onion"){
+return "https://stoat.com"
+}
+
+if(url.includes("base44")){
+return "https://" + url.replace(".onion",".app")
+}
+
+return "https://" + url.replace(".onion",".com")
+
+}
+
+function slowDelay(){
+return new Promise(resolve=>{
+setTimeout(resolve,2000 + Math.random()*3000)
+})
+}
+
+function showError(site){
+
+document.getElementById("view").innerHTML = `
+<div class="errorPage">
+
+<div class="robot">🤖</div>
+
+<h1>BryanEthernet bloqueou este site</h1>
+
+<p>O site <b>${site}</b> é considerado uma rede social proibida.</p>
+
+<p>Este navegador segue as regras do governo de BryanEthernet.</p>
+
+<div class="searchBox">
+
+<input id="search" placeholder="Pesquisar no BryanEthernet">
+
+<button onclick="search()">Pesquisar</button>
+
+</div>
+
+<div id="results"></div>
+
+</div>
+`
+
+}
+
+function search(){
+
+let q = document.getElementById("search").value.toLowerCase()
+
+let results = document.getElementById("results")
+
+results.innerHTML = ""
+
+let pages = [
+
+{
+title:"Que sites são permetidos e não permetidos em navegador de BryanEthernet?",
+text:`Isso não é permetido por causa que o governo de BryanEhternet Não querem ver postages de seu navegador.
+
+os unicos sites permetidos pelo governo são :
+
+discord.onion
+chattingjaponese.onion
+stoat.onion`
+},
+
+{
+title:"Por que redes sociais são bloqueadas?",
+text:"O governo BryanEthernet bloqueia redes sociais para evitar compartilhamento de postagens."
+},
+
+{
+title:"Lista de sites bloqueados",
+text:blockedSites.join(", ")
+}
+
+]
+
+pages.forEach(p=>{
+
+if(p.title.toLowerCase().includes(q)){
+
+let div=document.createElement("div")
+
+div.className="searchResult"
+
+div.innerHTML = "<h3>"+p.title+"</h3><p>"+p.text+"</p>"
+
+results.appendChild(div)
+
+}
+
+})
+
+}
+
+async function openSite(){
+
+let input = document.getElementById("url").value.trim().toLowerCase()
+
+if(!input){
+
+showError("site desconhecido")
+return
+
+}
+
+if(!input.endsWith(".onion")){
+
+document.getElementById("view").innerHTML="<h2 style='padding:40px'>Este navegador só aceita domínios .onion</h2>"
+return
+
+}
+
+let clean = input.replace("https://","").replace("http://","")
+clean = clean.replace("www.","")
+
+if(blockedSites.includes(clean)){
+
+showError(clean)
+return
+
+}
+
+document.getElementById("view").innerHTML="<h2 style='padding:20px'>Conectando na rede BryanEthernet...</h2>"
+
+await slowDelay()
+
+let iframe = document.createElement("iframe")
+
+iframe.src = convertOnion(clean)
+
+document.getElementById("view").innerHTML=""
+
+document.getElementById("view").appendChild(iframe)
+
+}
+
+</script>
+
+</body>
+</html>
