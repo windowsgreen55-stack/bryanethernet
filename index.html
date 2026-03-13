@@ -1,248 +1,158 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
-<meta charset="UTF-8">
-<title>BryanEthernet Browser</title>
-
-<link rel="icon" href="favicon.ico">
-
-<style>
-
-body{
-margin:0;
-background:#0f0f0f;
-color:white;
-font-family:Arial;
-}
-
-#topbar{
-background:#1a1a1a;
-padding:10px;
-display:flex;
-gap:10px;
-}
-
-#url{
-flex:1;
-padding:8px;
-border:none;
-border-radius:6px;
-}
-
-button{
-padding:8px 12px;
-background:#2a2a2a;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
-}
-
-iframe{
-width:100%;
-height:calc(100vh - 60px);
-border:none;
-}
-
-.errorPage{
-text-align:center;
-padding:60px;
-}
-
-.robot{
-font-size:80px;
-}
-
-.searchResult{
-margin-top:20px;
-padding:15px;
-background:#1e1e1e;
-border-radius:10px;
-}
-
-</style>
-
+  <meta charset="UTF-8">
+  <title>BryanEthernet Browser</title>
+  <link rel="icon" href="favicon.ico">
+  <style>
+    body {
+      margin: 0;
+      background: #0f0f0f;
+      color: white;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #topbar {
+      background: #1a1a1a;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+    }
+    #url {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: white;
+      font-size: 15px;
+    }
+    button {
+      padding: 10px 16px;
+      background: #2a2a2a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover { background: #444; }
+    #view {
+      height: calc(100vh - 60px);
+      position: relative;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    .errorPage, .loading, .info {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .robot { font-size: 90px; margin-bottom: 20px; }
+    h2.info { color: #aaa; }
+  </style>
 </head>
-
 <body>
 
 <div id="topbar">
-<input id="url" placeholder="Digite um site .onion ou pesquise">
-<button onclick="openSite()">Abrir</button>
+  <input id="url" placeholder="Digite um site .onion (ex: discord.onion)" autofocus>
+  <button onclick="openSite()">Abrir</button>
 </div>
 
 <div id="view"></div>
 
 <script>
+const blockedSites = [
+  "instagram.onion", "youtube.onion", "tiktok.onion", "kwai.onion",
+  "bilibili.onion", "netflix.onion", "matrix.onion", "web.whatsapp.onion",
+  "angiru.com.onion"
+];
 
-/* =========================
-   CONSOLE WARNING
-========================= */
-
-console.clear()
-
-console.log(`
-                             ......                             
-                     ......................                     
-                 .....---+++--------+++---.....                 
-               ...--++-...................-+--...               
-            ...-++--.........................-++-...            
-          ...-++--.---------...................-++-...          
-         ..-+++----------------------------------+++-..         
-       ..-++++------------------------------------++++-..       
-      ..-+++#--------------------------------------++++-..      
-     ..-++##+++++++++---+++++++++++++++++---++++++++#+++-..     
-    ..-++###++++++++---+++++++++++++++++++---+++++++###++-..    
-   ..-++####+++++++--+++++++++++++++++++++++--++++++###+++-..   
-   .-+++##########+-+#######################+-+#########+++-.   
-  ..-++##########++++#######################++++#########++-..  
-  ..+++##########+++#########################+++#########+++..  
-  .-++###########+++#########################+++##########++-.  
- ..-++###########++###########################++##########++-.. 
- ..-++###########++###########################++##########++-.. 
- ..-++###########++###########################++##########++-.. 
-  .-++###########++###########################++##########++-.  
-  .-+++##########+++#########################+++#########+++-.  
-  ..-++###########++#########################++##########++-..  
-   .-+++##########+++#######################+++#########+++-.   
-   ..-++###########+++#####################+++#########+++-..   
-    ..-++###########+++###################+++#########+++-..    
-     ..-+++##########+++#################++##########+++-..     
-      ..-+++##########++++#############++###########+++-..      
-       ..-+++###########++++######################++++-..       
-         ..-+++###########++++##################++++-..         
-          ...-++++###########++++++#########++++++-...          
-             ..-+++++############+++++++++++++++-..             
-               ...-++++++++##########+++++++--...               
-                 .....--+++++++++++++++---.....                 
-                     ......................                     
-                             ......                             
-`)
-
-console.warn("[!] Do not paste random code from other users, 99/100 times you will be executing something malicious!")
-
-/* =========================
-   BLOQUEIOS
-========================= */
-
-let blockedSites = [
-"instagram.onion",
-"youtube.onion",
-"tiktok.onion",
-"kwai.onion",
-"bilibili.onion",
-"netflix.onion",
-"matrix.onion",
-"web.whatsapp.onion",
-"angiru.com.onion"
-]
-
-/* =========================
-   CONVERSÃO .ONION
-========================= */
-
-function convertOnion(url){
-
-url = url.replace("https://","").replace("http://","")
-url = url.replace("www.","")
-
-if(url === "chattingjaponese.onion"){
-return "https://windowsgreen55-stack.github.io/-j-a-p-o-n-e-s-e-/"
+function cleanInput(input) {
+  let u = input.trim().toLowerCase();
+  u = u.replace(/^https?:\/\//, '').replace(/^www\./, '');
+  return u;
 }
 
-if(url === "discord.onion"){
-return "https://discord.com/app"
+function convertOnion(clean) {
+  if (clean === "chattingjaponese.onion") return "https://windowsgreen55-stack.github.io/-j-a-p-o-n-e-s-e-/";
+  if (clean === "discord.onion") return "https://discord.com/app";
+  if (clean === "stoat.onion") return "https://stoat.com";
+  if (clean.includes("base44")) return "https://" + clean.replace(".onion", ".app");
+  return "https://" + clean.replace(".onion", ".com");
 }
 
-if(url === "stoat.onion"){
-return "https://stoat.com"
+function slowDelay() {
+  return new Promise(r => setTimeout(r, 2000 + Math.random() * 3000));
 }
 
-if(url.includes("base44")){
-return "https://" + url.replace(".onion",".app")
+function showError(site) {
+  document.getElementById("view").innerHTML = `
+    <div class="errorPage">
+      <div class="robot">🤖</div>
+      <h1>BryanEthernet bloqueou este site</h1>
+      <p>O site <b>${site}</b> é considerado uma rede social proibida.</p>
+    </div>`;
 }
 
-return "https://" + url.replace(".onion",".com")
-
+function showLoading() {
+  document.getElementById("view").innerHTML = `
+    <div class="loading">
+      <h2>Conectando na rede BryanEthernet... (pode demorar alguns segundos)</h2>
+    </div>`;
 }
 
-/* =========================
-   DELAY
-========================= */
-
-function slowDelay(){
-return new Promise(resolve=>{
-setTimeout(resolve,2000 + Math.random()*3000)
-})
+function showMessage(msg) {
+  document.getElementById("view").innerHTML = `<div class="info"><h2>${msg}</h2></div>`;
 }
 
-/* =========================
-   ERRO
-========================= */
+async function openSite() {
+  const input = document.getElementById("url").value.trim();
+  if (!input) {
+    showMessage("Digite um endereço .onion");
+    return;
+  }
 
-function showError(site){
+  if (!input.toLowerCase().endsWith(".onion")) {
+    showMessage("Este navegador só aceita domínios .onion");
+    return;
+  }
 
-document.getElementById("view").innerHTML = `
-<div class="errorPage">
+  const clean = cleanInput(input);
 
-<div class="robot">🤖</div>
+  if (blockedSites.includes(clean)) {
+    showError(clean);
+    return;
+  }
 
-<h1>BryanEthernet bloqueou este site</h1>
+  console.log("[BryanEthernet] Resolving onion address...");
+  console.log("[BryanEthernet] Connecting nodes...");
+  console.log("[BryanEthernet] Loading resources for:", clean);
 
-<p>O site <b>${site}</b> é considerado uma rede social proibida.</p>
+  showLoading();
+  await slowDelay();
 
-</div>
-`
+  const targetUrl = convertOnion(clean);
 
+  const iframe = document.createElement("iframe");
+  iframe.src = targetUrl;
+  iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation allow-modals allow-storage-access-by-user-activation";
+
+  document.getElementById("view").innerHTML = "";
+  document.getElementById("view").appendChild(iframe);
+
+  // Se der erro no iframe (muito comum), mostra aviso
+  iframe.onerror = () => {
+    showMessage("Falha ao carregar o site.<br>Muitos sites bloqueiam exibição em iframe por segurança (X-Frame-Options ou CSP).");
+  };
 }
 
-/* =========================
-   ABRIR SITE
-========================= */
-
-async function openSite(){
-
-let input = document.getElementById("url").value.trim().toLowerCase()
-
-if(!input){
-showError("site desconhecido")
-return
-}
-
-if(!input.endsWith(".onion")){
-document.getElementById("view").innerHTML="<h2 style='padding:40px'>Este navegador só aceita domínios .onion</h2>"
-return
-}
-
-let clean = input.replace("https://","").replace("http://","")
-clean = clean.replace("www.","")
-
-if(blockedSites.includes(clean)){
-showError(clean)
-return
-}
-
-/* logs fake tipo navegador */
-
-console.log("[BryanEthernet] Resolving onion address...")
-console.log("[BryanEthernet] Connecting nodes...")
-console.log("[BryanEthernet] Loading resources for:", clean)
-
-document.getElementById("view").innerHTML="<h2 style='padding:20px'>Conectando na rede BryanEthernet...</h2>"
-
-await slowDelay()
-
-let iframe = document.createElement("iframe")
-
-iframe.src = convertOnion(clean)
-
-document.getElementById("view").innerHTML=""
-
-document.getElementById("view").appendChild(iframe)
-
-}
-
+document.getElementById("url").addEventListener("keypress", e => {
+  if (e.key === "Enter") openSite();
+});
 </script>
 
 </body>
